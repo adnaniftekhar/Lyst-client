@@ -77,6 +77,11 @@ const CompletedTodoItem = styled(TodoItem)`
 
 const API_URL = 'https://lyst-app-backend-0803954df2ff.herokuapp.com';
 
+const Title = styled.h1`
+  color: #2c3e50;
+  text-align: center;
+`;
+
 function Dashboard() {
   const [lists, setLists] = useState([]);
   const [newListTitle, setNewListTitle] = useState('');
