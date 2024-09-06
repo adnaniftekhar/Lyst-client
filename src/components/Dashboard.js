@@ -70,7 +70,7 @@ const CompletedTodoItem = styled(TodoItem)`
   opacity: 0.6;
 `;
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_URL = 'https://lyst-app-backend-0803954df2ff.herokuapp.com';
 
 function Dashboard() {
   const [lists, setLists] = useState([]);
