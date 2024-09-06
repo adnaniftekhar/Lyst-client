@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { signOut, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from '../config/firebase';
@@ -70,6 +70,8 @@ const CompletedTodoItem = styled(TodoItem)`
   opacity: 0.6;
 `;
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 function Dashboard() {
   const [lists, setLists] = useState([]);
   const [newListTitle, setNewListTitle] = useState('');
@@ -80,6 +82,19 @@ function Dashboard() {
   const [editingTodoId, setEditingTodoId] = useState(null);
   const [editingTodoText, setEditingTodoText] = useState('');
   const [expandedLists, setExpandedLists] = useState({});
+
+  const fetchLists = useCallback(async () => {
+    if (!user) return;
+    try {
+      const token = await user.getIdToken();
+      const response = await axios.get(`${API_URL}/api/lists`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setLists(response.data);
+    } catch (error) {
+      console.error('Error fetching lists:', error);
+    }
+  }, [user]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -92,20 +107,7 @@ function Dashboard() {
     });
 
     return () => unsubscribe();
-  }, []);
-
-  const fetchLists = async () => {
-    if (!user) return;
-    try {
-      const token = await user.getIdToken();
-      const response = await axios.get('http://localhost:5000/api/lists', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setLists(response.data);
-    } catch (error) {
-      console.error('Error fetching lists:', error);
-    }
-  };
+  }, [fetchLists]);
 
   const handleCreateList = async (e) => {
     e.preventDefault();
@@ -115,7 +117,7 @@ function Dashboard() {
     }
     try {
       const token = await user.getIdToken();
-      await axios.post('http://localhost:5000/api/lists', { title: newListTitle }, {
+      await axios.post(`${API_URL}/api/lists`, { title: newListTitle }, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setNewListTitle('');
@@ -130,7 +132,7 @@ function Dashboard() {
     if (editingTitle.trim() === '') return;
     try {
       const token = await user.getIdToken();
-      await axios.put(`http://localhost:5000/api/lists/${listId}`, { title: editingTitle }, {
+      await axios.put(`${API_URL}/api/lists/${listId}`, { title: editingTitle }, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEditingListId(null);
@@ -145,7 +147,7 @@ function Dashboard() {
     if (window.confirm('Are you sure you want to delete this list?')) {
       try {
         const token = await user.getIdToken();
-        await axios.delete(`http://localhost:5000/api/lists/${listId}`, {
+        await axios.delete(`${API_URL}/api/lists/${listId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         fetchLists();
@@ -160,7 +162,7 @@ function Dashboard() {
     if (!newTodo.trim()) return;
     try {
       const token = await user.getIdToken();
-      const response = await axios.post(`http://localhost:5000/api/lists/${listId}/todos`, { text: newTodo }, {
+      await axios.post(`${API_URL}/api/lists/${listId}/todos`, { text: newTodo }, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setNewTodo('');
@@ -174,7 +176,7 @@ function Dashboard() {
   const handleToggleTodo = async (listId, todoId) => {
     try {
       const token = await user.getIdToken();
-      await axios.patch(`http://localhost:5000/api/lists/${listId}/todos/${todoId}/toggle`, {}, {
+      await axios.patch(`${API_URL}/api/lists/${listId}/todos/${todoId}/toggle`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchLists(); // This will re-render the list with the updated todo status
@@ -188,7 +190,7 @@ function Dashboard() {
     if (editingTodoText.trim() === '') return;
     try {
       const token = await user.getIdToken();
-      await axios.put(`http://localhost:5000/api/lists/${listId}/todos/${todoId}`, { text: editingTodoText }, {
+      await axios.put(`${API_URL}/api/lists/${listId}/todos/${todoId}`, { text: editingTodoText }, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEditingTodoId(null);
@@ -202,7 +204,7 @@ function Dashboard() {
   const handleDeleteTodo = async (listId, todoId) => {
     try {
       const token = await user.getIdToken();
-      await axios.delete(`http://localhost:5000/api/lists/${listId}/todos/${todoId}`, {
+      await axios.delete(`${API_URL}/api/lists/${listId}/todos/${todoId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchLists();
