@@ -8,6 +8,8 @@ const Container = styled.div`
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
+  font-family: Arial, sans-serif;
+  color: #333;
 `;
 
 const Button = styled.button`
@@ -38,12 +40,15 @@ const ListItem = styled.li`
 const ListTitle = styled.span`
   flex-grow: 1;
   margin-right: 10px;
+  color: #3498db;
+  font-weight: bold;
 `;
 
 const TodoText = styled.span`
   flex-grow: 1;
   margin-left: 10px;
   text-decoration: ${props => props.completed === 'true' ? 'line-through' : 'none'};
+  color: ${props => props.completed === 'true' ? '#7f8c8d' : '#2c3e50'};
 `;
 
 const TodoItem = styled.li`
@@ -235,7 +240,7 @@ function Dashboard() {
 
   return (
     <Container>
-      <h1>My Lists</h1>
+      <Title>Lyst App: Todos Simplified</Title>
       {user ? (
         <>
           <Button onClick={handleSignOut}>Sign Out</Button>
